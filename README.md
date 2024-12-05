@@ -30,119 +30,140 @@ Publish the website in the given URL.
 
 # PROGRAM :
 ```
-math.html
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Javascript</title>
-<style>
-input{
-border-radius: 10px;
-           padding: 10px;
-           margin-top: 10px;
-           margin-right:5px ;
-       }
-       body{
-           margin-top: 15%;
-       }
-       h1{
-           color:rgb(238, 83, 83);
-           font-size: 40pz;
-           
-       }
-       form{
-           background-color: rgb(6, 6, 6);
-           width: 450px; ;
-       }
-   </style>
-   <script>
-       function pow(){
-           var x=document.getElementById("a").value
-           var y=document.getElementById("b").value
-           document.getElementById('r').innerText="power:" +x*x*y
-           
-       
-       }
-   </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Power Calculator</title>
+    <style type="text/css">
+        body {
+            background-color: #bdd1d3;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: cover;
+            text-align: center;
+            font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            color:brown;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        .container {
+            background-color: #c9c4b7;
+            border-radius: 100%;
+            padding: 75px;
+            box-shadow:#1fe374;
+            display:inline-block;
+            margin-top: 100px;
+        }
+        label {
+            font-size: 150%;
+            display:flow-root;
+            margin: 15px 0 5px;
+            
+        }
+        input[type="text"] {
+            width: calc(75% - 24px);
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid #051313;
+            margin-bottom: 15px;
+            font-size: 1em;
+        }
+        input[type="submit"] {
+            background-color: #1fe374;
+            color: rgb(211, 241, 247);
+            border: none;
+            border-radius: 10px;
+            padding: 10px 21px;
+            font-size: 1em;
+            cursor:pointer;
+        }
+        button:hover {
+            background-color: #d588b2;
+        }
+        p {
+            font-size: 1.2em;
+            margin-top: 20px;
+        }
+    </style>
 </head>
-<body >
-    <H2>
-   <br>
-   
-   <center>
-       <form >
-       
-       <h1>POWER CALCULATOR </h1>
-    
-   <input type="text" placeholder="Enter intensity" id="a">
-   <br>
-   <input type="text" placeholder="Enter resistance" id="b">
-   <br>
-   <input type="button" value="calculate" onclick="pow()"><br>
-   <label id="r"></label>
-</form>
-   </center>
-</H2>
+<body>
+    <div class="container">
+        <h1>The Power of the Bulb</h1>
+        <form method="POST">
+            {% csrf_token %}
+        <label >Intensity (A):</label>
+        <input type="text" name="intensity" value="{{I}}">
+        
+        <label >Resistance (Ohm):</label>
+        <input type="text" name="resistance" value="{{R}}"><br><br>
+        <input type="submit" value="Calculate"><br><br>
+        <label>Power(watts):</label>
+        <input type="text" name="power" value="{{power}}">
+    </div>
+</form>        
+
 </body>
 </html>
 
-view.py
-
+```
+# views.py
+```
 from django.shortcuts import render
-def EnergyCalc(request):
-    context = {
-        'power': "0", 
-        'intensity': "0", 
-        'resistance': "0"
-    }
-    
+def power_calculate(request):
+    context = {}
+    context['power'] = ""
+    context['I'] = ""
+    context['R'] = ""  
+
     if request.method == 'POST':
-        print("POST method is used")
-        
-        intensity = request.POST.get('intensity', '0')
-        resistance = request.POST.get('resistance', '0')
-        
-        print('Request:', request)
-        print('Intensity:', intensity)
-        print('Resistance:', resistance)
-        
-        try:
-            intensity = float(intensity)  
-            resistance = float(resistance) 
-            power = (intensity ** 2) * resistance
-            
-           
-            context['power'] = round(power, 2) 
-            context['intensity'] = round(intensity, 2)
-            context['resistance'] = round(resistance, 2)
-            
-            print(f'Calculated Power: {power}')
-        except ValueError as e:
-            
-            print(f'Error in calculation: {e}')
-            context['power'] = "Invalid input. Please enter valid numbers."
-    return render(request, 'mathapp/math.html', context)
 
-urls.py
+        I = float(request.POST.get('intensity', '0')) 
 
+        R = float(request.POST.get('resistance', '0')) 
+        
+        power = (I*I)*R
+       
+        context['power'] = f"{ power:.2f}"
+        
+        context['I'] = I
+        
+        context['R'] = R
+        
+        print(f"POST method is used")
+        print(f"request= {request}")
+        print(f"Intensity = {I}")
+        print(f"Resistance = {R}")
+        print(f"Power = {power}")
+       
+      
+    
+    return render(request, 'app1/app.html',context)
+```
+# urls.py
+```
 from django.contrib import admin
 from django.urls import path
-from mathapp import views
+from app1 import views
 urlpatterns = [
-    path('admin/', admin.site.urls), 
-    path('', views.EnergyCalc, name="EnergyCalc"), 
+    path('admin/', admin.site.urls),
+    path('powerofbulb/',views.power_calculate,name="powerofbulb"),
+    path('',views.power_calculate,name="powerofbulb")
 ]
 ```
 
 
 # SERVER SIDE PROCESSING:
-![image](https://github.com/user-attachments/assets/fa005f5b-12e2-4266-8646-1082ce0785e6)
+![WhatsApp Image 2024-12-05 at 14 26 06_7bd4fb32](https://github.com/user-attachments/assets/ae925b91-652e-49a8-8b0e-db6ab67f59ff)
+
 
 # HOMEPAGE:
-![image](https://github.com/user-attachments/assets/9754501a-b557-4efb-abd9-6a0d8127a2eb)
+![WhatsApp Image 2024-12-05 at 14 26 48_6e1e3f15](https://github.com/user-attachments/assets/382a5f71-5189-4500-9239-98cbeb004afc)
+
+
 
 # RESULT:
 The program for performing server side processing is completed successfully.
